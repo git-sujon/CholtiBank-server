@@ -23,20 +23,25 @@ enum AccountStatus {
 }
 
 model User {
-  id             String         @id @default(uuid())
-  firstName      String
-  lastName       String
-  nationalId     String         @unique
-  email          String         @unique
-  phoneNumber    String         @unique
-  password       String
-  role           UserRole
-  dateOfBirth    DateTime
-  profilePicture String?
-  address        String?
-  accountStatus  AccountStatus  @default(active)
-  lastLogin      DateTime?
-  account        FinancialInfo?
+  id                String         @id @default(uuid())
+  firstName         String
+  lastName          String
+  nationalId        String         @unique
+  email             String         @unique
+  phoneNumber       String         @unique
+  password          String
+  role              UserRole
+  dateOfBirth       DateTime
+  profilePicture    String?
+  address           String?
+  accountStatus     AccountStatus  @default(active)
+  lastLogin         DateTime?
+  passwordChangedAt DateTime?
+  pinChangeAt       DateTime?
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
+  customerAccounts  FinancialInfo?
+  devices           DeviceInfo[]
 }
 
 model FinancialInfo {
@@ -44,4 +49,23 @@ model FinancialInfo {
   accountNumber  String @unique
   accountBalance Float  @default(0.0)
   user           User   @relation(fields: [id], references: [id])
+}
+
+model DeviceInfo {
+  id              String   @id @default(uuid())
+  devicesId       String?
+  devicesModel    String?
+  devicesType     String?
+  devicesVendor   String?
+  browserName     String?
+  browserVersion  String?
+  engineName      String?
+  engineVersion   String?
+  osName          String?
+  osVersion       String?
+  cpuArchitecture String?
+  agentClient     String?
+  updatedAt       DateTime @updatedAt
+  User            User     @relation(fields: [userId], references: [id])
+  userId          String
 }

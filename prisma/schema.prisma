@@ -10,24 +10,38 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-enum AccountStatusEnum {
+enum UserRole {
+  customer
+  admin
+  loan_officer
+  customer_service_representative
+}
+
+enum AccountStatus {
   active
   inActive
 }
 
 model User {
-  id             Int               @id @default(autoincrement())
+  id             String         @id @default(uuid())
   firstName      String
   lastName       String
-  nationalId     Int
-  email          String            @unique
+  nationalId     String         @unique
+  email          String         @unique
+  phoneNumber    String         @unique
   password       String
+  role           UserRole
   dateOfBirth    DateTime
-  phoneNumber    String            @unique
-  accountBalance Float             @default(0.0)
-  accountNumber  String            @unique
   profilePicture String?
   address        String?
-  accountStatus  AccountStatusEnum @default(active)
+  accountStatus  AccountStatus  @default(active)
   lastLogin      DateTime?
+  account        FinancialInfo?
+}
+
+model FinancialInfo {
+  id             String @id @default(uuid())
+  accountNumber  String @unique
+  accountBalance Float  @default(0.0)
+  user           User   @relation(fields: [id], references: [id])
 }

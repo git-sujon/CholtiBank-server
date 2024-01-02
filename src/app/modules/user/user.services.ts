@@ -9,8 +9,8 @@ import {
   checkPhoneNumberExist,
   createDevicesInfo,
 } from './user.utils';
-import { User } from '@prisma/client';
-import excludeFields from '../../../helpers/excludingfields';
+import { IUserLogin } from './user.interface';
+import { jwtHelpers } from '../../../helpers/jwtHelpers';
 
 const userSignUp = async (payload: any) => {
   checkEmailExist(payload.email);
@@ -33,12 +33,56 @@ const userSignUp = async (payload: any) => {
     });
 
     await createDevicesInfo(tx, user.id);
-    const keysToExclude: (keyof User)[] = ['password'];
 
-    return excludeFields(user, keysToExclude);
+    const userId = user.id;
+    const role = user.role;
+
+    const accessToken = jwtHelpers.createToken(
+      { userId, role },
+      config.jwt.secret as string,
+      config.jwt.expires_in as string,
+    );
+
+    return accessToken;
   });
+};
+
+const loginUser = async (payload: IUserLogin) => {
+  const isUserExist = await prisma.user.findUnique({
+    where: {
+      phoneNumber: payload.phoneNumber,
+    },
+  });
+
+  if (!isUserExist) {
+    throw new ApiError(httpStatus.NOT_FOUND, 'User or Password Not Matching');
+  }
+
+  const isPasswordMatch = await bcrypt.compare(
+    payload.password,
+    isUserExist.password,
+  );
+
+  if (!isPasswordMatch) {
+    throw new ApiError(
+      httpStatus.UNAUTHORIZED,
+      'User or Password Not Matching',
+    );
+  }
+
+  const userId = isUserExist.id;
+  const role = isUserExist.role;
+
+  const accessToken = jwtHelpers.createToken(
+    { userId, role },
+    config.jwt.secret as string,
+    config.jwt.expires_in as string,
+  );
+
+  return accessToken;
 };
 
 export const UserServices = {
   userSignUp,
+  loginUser,
 };

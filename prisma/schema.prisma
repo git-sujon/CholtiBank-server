@@ -11,7 +11,7 @@ datasource db {
 }
 
 enum UserRole {
-  customer
+  user
   admin
   loan_officer
   customer_service_representative

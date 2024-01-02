@@ -1,7 +1,7 @@
 /* eslint-disable no-unused-vars */
 export enum ENUM_USER_ROLE {
-  CONTROLLER = 'controller',
-  DEALER = 'dealer',
-  SENDER = 'sender',
-  RECEIVER = 'receiver',
+  USER = 'user',
+  ADMIN = 'admin',
+  LOAN_OFFICER = 'loan_officer',
+  CUSTOMER_SERVICE_REPRESENTATIVE = 'customer_service_representative',
 }

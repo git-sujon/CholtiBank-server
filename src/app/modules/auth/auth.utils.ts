@@ -2,11 +2,8 @@ import httpStatus from 'http-status';
 import ApiError from '../../../errors/ApiError';
 import prisma from '../../../shared/prisma';
 
-export const createDevicesInfo = async (tx: any, userId: string) => {
-  return tx.deviceInfo.create({
-    data: { userId: userId },
-  });
-};
+
+
 
 export const checkPhoneNumberExist = async (phoneNumber: string) => {
   const userAlreadyExist = await prisma.user.findFirst({
@@ -30,7 +27,7 @@ export const checkNationalIdExist = async (nationalId: string) => {
 };
 
 export const checkEmailExist = async (email: string) => {
-  const userAlreadyExist = await prisma.user.findFirst({
+  const userAlreadyExist = await prisma.personalInfo.findFirst({
     where: {
       email,
     },

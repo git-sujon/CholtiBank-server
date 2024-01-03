@@ -3,13 +3,12 @@ import ApiError from '../../../errors/ApiError';
 import prisma from '../../../shared/prisma';
 import bcrypt from 'bcrypt';
 import config from '../../../config';
-import { checkEmailExist, checkNationalIdExist, checkPhoneNumberExist, createDevicesInfo } from './auth.utils';
+import { checkNationalIdExist, checkPhoneNumberExist } from './auth.utils';
 import { jwtHelpers } from '../../../helpers/jwtHelpers';
 import { IUserLogin } from './auth.interface';
+import { IUser } from '../user/user.interface';
 
-
-const userSignUp = async (payload: any) => {
-  checkEmailExist(payload.email);
+const userSignUp = async (payload: IUser) => {
   checkPhoneNumberExist(payload.phoneNumber);
   checkNationalIdExist(payload.nationalId);
 
@@ -19,16 +18,23 @@ const userSignUp = async (payload: any) => {
       payload.password,
       Number(config.bycrypt_salt_rounds),
     );
-
+    const hashPin = await bcrypt.hash(
+      payload.pin,
+      Number(config.bycrypt_salt_rounds),
+    );
     payload.password = hashPassword;
-
+    payload.pin = hashPin;
     const user = await tx.user.create({
       data: {
         ...payload,
+        personalInfo: {
+          create: {},
+        },
+        devices: {
+          create: {},
+        },
       },
     });
-
-    await createDevicesInfo(tx, user.id);
 
     const userId = user.id;
     const role = user.role;
@@ -44,6 +50,7 @@ const userSignUp = async (payload: any) => {
 };
 
 const loginUser = async (payload: IUserLogin) => {
+    
   const isUserExist = await prisma.user.findUnique({
     where: {
       phoneNumber: payload.phoneNumber,

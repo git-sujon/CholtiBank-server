@@ -31,7 +31,7 @@ model User {
   password          String
   pin               String
   role              UserRole
-  lastLogin         DateTime?
+  lastLogin         DateTime?      @default(now())
   passwordChangedAt DateTime?
   pinChangeAt       DateTime?
   accountStatus     AccountStatus  @default(active)
@@ -61,13 +61,13 @@ model PersonalInfo {
 }
 
 model FinancialInfo {
-  id             String @id @default(uuid())
-  accountNumber  String @unique
-  accountBalance Float  @default(0.0)
-  accountType    String @default("current")
-  currency       String @default("BDT")
-  interestRate   Float?
-  creditLimit    Float?
+  id                  String        @id @default(uuid())
+  accountNumber       String        @unique
+  accountBalance      Float         @default(0.0)
+  accountType         String        @default("current")
+  currency            String        @default("BDT")
+  interestRate        Float?
+  creditLimit         Float?
   overdraftLimit      Float?
   withdrawalLimit     Float?
   investmentPortfolio String?

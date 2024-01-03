@@ -23,24 +23,24 @@ enum AccountStatus {
 }
 
 model User {
-  id                String         @id @default(uuid())
-  firstName         String
-  lastName          String
-  nationalId        String         @unique
-  phoneNumber       String         @unique
-  password          String
-  pin               String
-  role              UserRole
-  lastLogin         DateTime?      @default(now())
-  passwordChangedAt DateTime?
-  pinChangeAt       DateTime?
-  accountStatus     AccountStatus  @default(active)
-  createdAt         DateTime       @default(now())
-  updatedAt         DateTime       @updatedAt
-  customerAccounts  FinancialInfo?
-  devices           DeviceInfo[]
-  personalInfo      PersonalInfo?
-  Deposit           Deposit[]
+  id                 String             @id @default(uuid())
+  firstName          String
+  lastName           String
+  nationalId         String             @unique
+  phoneNumber        String             @unique
+  password           String
+  pin                String
+  role               UserRole
+  lastLogin          DateTime?          @default(now())
+  passwordChangedAt  DateTime?
+  pinChangeAt        DateTime?
+  accountStatus      AccountStatus      @default(active)
+  createdAt          DateTime           @default(now())
+  updatedAt          DateTime           @updatedAt
+  userFinancialInfo  UserFinancialInfo?
+  devices            DeviceInfo[]
+  personalInfo       PersonalInfo?
+  transactionHistory Transaction[]
 }
 
 model PersonalInfo {
@@ -61,12 +61,12 @@ model PersonalInfo {
   user             User      @relation(fields: [id], references: [id])
 }
 
-model FinancialInfo {
-  id                  String        @id @default(uuid())
-  accountNumber       String        @unique
-  accountBalance      Float         @default(0.0)
-  accountType         String        @default("current")
-  currency            String        @default("BDT")
+model UserFinancialInfo {
+  id                  String    @id @default(uuid())
+  accountNumber       String    @unique
+  accountBalance      Float     @default(0.0)
+  accountType         String    @default("current")
+  currency            String    @default("BDT")
   interestRate        Float?
   creditLimit         Float?
   overdraftLimit      Float?
@@ -75,18 +75,8 @@ model FinancialInfo {
   creditScore         Int?
   accountOpeningDate  DateTime?
   lastUpdatedDate     DateTime?
-  updatedAt           DateTime      @updatedAt
-  user                User          @relation(fields: [id], references: [id])
-  transactionHistory  Transaction[]
-}
-
-model Transaction {
-  id          String        @id @default(uuid())
-  amount      Float
-  description String
-  createdAt   DateTime      @default(now())
-  financialId String
-  financial   FinancialInfo @relation(fields: [financialId], references: [id])
+  updatedAt           DateTime  @updatedAt
+  user                User      @relation(fields: [id], references: [id])
 }
 
 model DeviceInfo {
@@ -111,13 +101,36 @@ enum DepositSourceEnum {
   bank_transfer
   credit_card
   atm
+  agent
 }
 
-model Deposit {
-  id        String            @id @default(uuid())
-  amount    Float
-  source    DepositSourceEnum
-  createdAt DateTime          @default(now())
-  userId    String
-  user      User              @relation(fields: [userId], references: [id])
+enum WithdrawSourceEnum {
+  agent
+  atm
+}
+
+enum TransactionTypeEnum {
+  Deposit
+  Withdrawal
+  Transfer
+}
+
+model Transaction {
+  id               String              @id @default(uuid())
+  amount           Float
+  transactionId    String
+  transactionType  TransactionTypeEnum
+  dipositSource    DepositSourceEnum?
+  withdrawSource   WithdrawSourceEnum?
+  bankName         String?
+  bankAccountNo    String?
+  creditCardName   String?
+  creditCardNumber String?
+  atmId            String?
+  agentId          String?
+  receiverId       String?
+  reference        String?
+  createdAt        DateTime            @default(now())
+  userId           String
+  user             User                @relation(fields: [userId], references: [id])
 }

@@ -26,4 +26,4 @@ route.patch(
   UserController.updateMyProfile,
 );
 
-export const UserRoute = route;
+export const UserRoutes = route;

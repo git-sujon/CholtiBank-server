@@ -6,6 +6,7 @@ import { Secret } from 'jsonwebtoken';
 import config from '../../../config';
 import prisma from '../../../shared/prisma';
 import { ITransaction } from './transaction.interface';
+import { TransactionTypeEnum } from '@prisma/client';
 
 const depositMoney = async (
   token: string | undefined,
@@ -37,23 +38,27 @@ const depositMoney = async (
   }
 
   await prisma.$transaction(async tx => {
-    await tx.userFinancialInfo.update({
-      where: {
-        id: decodedUserInfo.userFinancialInfo?.id,
-      },
-      data: {
-        accountBalance:
-          //@ts-expect-error
-          decodedUserInfo?.userFinancialInfo?.accountBalance + payload.amount,
-      },
-    });
+    if (decodedUserInfo && decodedUserInfo.userFinancialInfo) {
+      await tx.userFinancialInfo.update({
+        where: {
+          id: decodedUserInfo.userFinancialInfo?.id,
+        },
+        data: {
+          accountBalance:
+            decodedUserInfo.userFinancialInfo?.accountBalance + payload.amount,
+        },
+      });
 
-    await prisma.transaction.create({
-      data: {
-        userId: decodedUserInfo.id,
-        ...payload,
-      },
-    });
+      await prisma.transaction.create({
+        data: {
+          //@ts-expect-error
+          userId: decodedUserInfo.id,
+          //@ts-expect-error
+          transactionType: TransactionTypeEnum.Deposit,
+          ...payload,
+        },
+      });
+    }
   });
 };
 

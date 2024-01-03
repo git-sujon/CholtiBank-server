@@ -36,7 +36,7 @@ const userSignUp = async (payload: IUser) => {
       },
     });
 
-    await tx.financialInfo.create({
+    await tx.userFinancialInfo.create({
       data: {
         accountNumber: '8080' + user.phoneNumber,
         user: {

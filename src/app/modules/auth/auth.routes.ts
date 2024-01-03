@@ -6,4 +6,4 @@ const route = express.Router();
 route.post('/login', AuthController.loginUser);
 route.post('/signup', AuthController.userSignUp);
 
-export const AuthRoute = route;
+export const AuthRoutes = route;

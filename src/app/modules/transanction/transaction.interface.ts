@@ -15,6 +15,6 @@ export type ITransaction = {
     agentId?: string;
     receiverId?: string;
     reference?: string;
-    createdAt: Date;
+    userId:string
   };
   

@@ -73,7 +73,60 @@ const getMyProfile = async (token: string | undefined) => {
     return updatedResult;
   };
 
+
+  const addMoneyToMoneyAccount = async (token: string | undefined, amount: number) => {
+    if (!token) {
+      throw new ApiError(httpStatus.UNAUTHORIZED, 'Unauthorized access');
+    }
+    const verifyToken = jwtHelpers.verifyToken(
+      token as string,
+      config.jwt.secret as Secret
+    );
+  
+    const decodedUserInfo = await prisma.user.findUnique({
+      where: {
+        id: verifyToken?.userId,
+      },
+      include:{
+        customerAccounts:true
+      }
+    });
+  
+    if (!decodedUserInfo) {
+      throw new ApiError(httpStatus.NOT_FOUND, 'Unauthorized');
+    }
+   
+  
+    if (amount < 0) {
+      throw new ApiError(httpStatus.NOT_ACCEPTABLE, "Amount can't be Negative");
+    }
+  
+    await prisma.$transaction(async tx => {
+      await tx.financialInfo.update({
+        where: {
+          id: decodedUserInfo.customerAccounts?.accountBalance,
+        },
+        data: {
+          virtualMoneyBalance:
+            (decodedUserInfo.controller?.virtualMoneyBalance ?? 0) + amount,
+          totalDeposit: (decodedUserInfo.controller?.totalDeposit ?? 0) + amount,
+        },
+      });
+  
+      if (controllerId) {
+        await tx.virtualMoney.create({
+          data: {
+            amount: amount,
+            moneyTransferDirection: MoneyTransferDirection.controller_deposit,
+            controllerId: controllerId,
+          },
+        });
+      }
+    });
+  };
+
 export const UserServices = {
     getMyProfile,
-    updateMyProfile
+    updateMyProfile,
+    addMoneyToMoneyAccount
 };

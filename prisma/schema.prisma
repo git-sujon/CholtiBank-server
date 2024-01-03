@@ -27,28 +27,65 @@ model User {
   firstName         String
   lastName          String
   nationalId        String         @unique
-  email             String         @unique
   phoneNumber       String         @unique
   password          String
+  pin               String
   role              UserRole
-  dateOfBirth       DateTime
-  profilePicture    String?
-  address           String?
-  accountStatus     AccountStatus  @default(active)
   lastLogin         DateTime?
   passwordChangedAt DateTime?
   pinChangeAt       DateTime?
+  accountStatus     AccountStatus  @default(active)
   createdAt         DateTime       @default(now())
   updatedAt         DateTime       @updatedAt
   customerAccounts  FinancialInfo?
   devices           DeviceInfo[]
+  personalInfo      PersonalInfo?
+}
+
+model PersonalInfo {
+  id               String    @id @default(uuid())
+  dateOfBirth      DateTime?
+  profilePicture   String?
+  gender           String?
+  nationality      String?
+  address          String?
+  phoneNumber      String?
+  email            String?
+  fatherName       String?
+  motherName       String?
+  currentAddress   String?
+  permanentAddress String?
+  maritalStatus    String?
+  occupation       String?
+  user             User      @relation(fields: [id], references: [id])
 }
 
 model FinancialInfo {
   id             String @id @default(uuid())
   accountNumber  String @unique
   accountBalance Float  @default(0.0)
-  user           User   @relation(fields: [id], references: [id])
+  accountType    String @default("current")
+  currency       String @default("BDT")
+  interestRate   Float?
+  creditLimit    Float?
+  overdraftLimit      Float?
+  withdrawalLimit     Float?
+  investmentPortfolio String?
+  creditScore         Int?
+  accountOpeningDate  DateTime?
+  lastUpdatedDate     DateTime?
+  updatedAt           DateTime      @updatedAt
+  user                User          @relation(fields: [id], references: [id])
+  transactionHistory  Transaction[]
+}
+
+model Transaction {
+  id          String        @id @default(uuid())
+  amount      Float
+  description String
+  createdAt   DateTime      @default(now())
+  financialId String
+  financial   FinancialInfo @relation(fields: [financialId], references: [id])
 }
 
 model DeviceInfo {
@@ -66,6 +103,5 @@ model DeviceInfo {
   cpuArchitecture String?
   agentClient     String?
   updatedAt       DateTime @updatedAt
-  User            User     @relation(fields: [userId], references: [id])
-  userId          String
+  User            User     @relation(fields: [id], references: [id])
 }

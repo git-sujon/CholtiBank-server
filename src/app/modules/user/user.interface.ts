@@ -1,30 +1,19 @@
-export type IUserLogin = {
+import { AccountStatus, UserRole } from "@prisma/client";
+
+export type User = {
+    id: string;
+    firstName: string;
+    lastName: string;
+    nationalId: string;
+    email: string;
     phoneNumber: string;
     password: string;
+    role: UserRole;
+    dateOfBirth: Date;
+    profilePicture?: string | null;
+    address?: string | null;
+    accountStatus: AccountStatus;
+    lastLogin?: Date | null;
+    passwordChangedAt?: Date | null;
+    pinChangeAt?: Date | null;
   };
-  
-  
-  export type IDeviceInfo = {
-    userId: string;
-    devicesId?: string;
-    devicesModel?: string;
-    devicesType?: string;
-    devicesVendor?: string;
-    browserName?: string;
-    browserVersion?: string;
-    engineName?: string;
-    engineVersion?: string;
-    osName?: string;
-    osVersion?: string;
-    cpuArchitecture?: string;
-    agentClient?: string;
-    updatedAt: Date;
-  };
-  
-
-  
-  export type IDeleteUserDevice = {
-    userId: string;
-  };
-  
-  

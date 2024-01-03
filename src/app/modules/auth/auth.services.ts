@@ -36,6 +36,17 @@ const userSignUp = async (payload: IUser) => {
       },
     });
 
+    await tx.financialInfo.create({
+      data: {
+        accountNumber: '8080' + user.phoneNumber,
+        user: {
+          connect: {
+            id: user.id,
+          },
+        },
+      },
+    });
+
     const userId = user.id;
     const role = user.role;
 
@@ -50,7 +61,6 @@ const userSignUp = async (payload: IUser) => {
 };
 
 const loginUser = async (payload: IUserLogin) => {
-    
   const isUserExist = await prisma.user.findUnique({
     where: {
       phoneNumber: payload.phoneNumber,

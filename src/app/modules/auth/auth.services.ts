@@ -7,6 +7,7 @@ import { checkNationalIdExist, checkPhoneNumberExist } from './auth.utils';
 import { jwtHelpers } from '../../../helpers/jwtHelpers';
 import { IUserLogin } from './auth.interface';
 import { IUser } from '../user/user.interface';
+import { generateAccountNumber } from '../../../helpers/generateAccountNumber';
 
 const userSignUp = async (payload: IUser) => {
   checkPhoneNumberExist(payload.phoneNumber);
@@ -38,7 +39,7 @@ const userSignUp = async (payload: IUser) => {
 
     await tx.userFinancialInfo.create({
       data: {
-        accountNumber: '8080' + user.phoneNumber,
+        accountNumber: generateAccountNumber(user.phoneNumber),
         user: {
           connect: {
             id: user.id,

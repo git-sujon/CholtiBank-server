@@ -61,7 +61,8 @@ model PersonalInfo {
 }
 
 model UserFinancialInfo {
-  accountNumber       String        @id @unique
+  id                  String        @id @default(uuid())
+  accountNumber       String        @unique
   accountBalance      Float         @default(0.0)
   accountType         String        @default("current")
   currency            String        @default("BDT")
@@ -74,7 +75,7 @@ model UserFinancialInfo {
   accountOpeningDate  DateTime?
   lastUpdatedDate     DateTime?
   updatedAt           DateTime      @updatedAt
-  user                User          @relation(fields: [accountNumber], references: [id])
+  user                User          @relation(fields: [id], references: [id])
   Deposit             Deposit[]
   Withdrawal          Withdrawal[]
   Transfer            Transfer[]
@@ -127,7 +128,8 @@ enum TransferSourceEnum {
 }
 
 model Deposit {
-  transactionId       String            @id @unique
+  id                  String            @id @default(uuid())
+  transactionId       String            @unique
   amount              Float
   depositSource       DepositSourceEnum
   bankName            String?
@@ -137,25 +139,29 @@ model Deposit {
   atmId               String?
   agentId             String?
   createdAt           DateTime          @default(now())
-  userFinancialInfo   UserFinancialInfo @relation(fields: [userFinancialInfoId], references: [accountNumber])
+  userFinancialInfo   UserFinancialInfo @relation(fields: [userFinancialInfoId], references: [id])
   userFinancialInfoId String
+  transaction         Transaction       @relation(fields: [id], references: [id])
 }
 
 model Withdrawal {
-  transactionId       String             @id @unique
+  id                  String             @id @default(uuid())
+  transactionId       String             @unique
   amount              Float
   withdrawSource      WithdrawSourceEnum
   atmId               String?
   agentId             String?
   createdAt           DateTime           @default(now())
-  userFinancialInfo   UserFinancialInfo  @relation(fields: [userFinancialInfoId], references: [accountNumber])
+  userFinancialInfo   UserFinancialInfo  @relation(fields: [userFinancialInfoId], references: [id])
   userFinancialInfoId String
+  transaction         Transaction        @relation(fields: [id], references: [id])
 }
 
 model Transfer {
-  transactionId       String            @id @unique
+  id                  String            @id @default(uuid())
+  transactionId       String            @unique
   amount              Float
-  userFinancialInfo   UserFinancialInfo @relation(fields: [userFinancialInfoId], references: [accountNumber])
+  userFinancialInfo   UserFinancialInfo @relation(fields: [userFinancialInfoId], references: [id])
   userFinancialInfoId String
   bankName            String?
   bankAccountNo       String?
@@ -169,13 +175,18 @@ model Transfer {
   atmId               String?
   agentId             String?
   createdAt           DateTime          @default(now())
+  transaction         Transaction       @relation(fields: [id], references: [id])
 }
 
 model Transaction {
-  transactionId       String              @id @unique
+  id                  String              @id @default(uuid())
+  transactionId       String              @unique
   transactionType     TransactionTypeEnum
   reference           String?
   createdAt           DateTime            @default(now())
-  userFinancialInfo   UserFinancialInfo   @relation(fields: [userFinancialInfoId], references: [accountNumber])
+  userFinancialInfo   UserFinancialInfo   @relation(fields: [userFinancialInfoId], references: [id])
   userFinancialInfoId String
+  Deposit             Deposit?
+  Withdrawal          Withdrawal?
+  Transfer            Transfer?
 }

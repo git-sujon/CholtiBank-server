@@ -5,13 +5,14 @@ import { jwtHelpers } from '../../../helpers/jwtHelpers';
 import { Secret } from 'jsonwebtoken';
 import config from '../../../config';
 import prisma from '../../../shared/prisma';
-import { ITransaction } from './transaction.interface';
+import { IDeposit } from './transaction.interface';
 import { TransactionTypeEnum } from '@prisma/client';
+import {
+  GenerateTransactionIDEnum,
+  generateTransactionId,
+} from '../../../helpers/generateTransactionId';
 
-const depositMoney = async (
-  token: string | undefined,
-  payload: ITransaction,
-) => {
+const depositMoney = async (token: string | undefined, payload: IDeposit) => {
   if (!token) {
     throw new ApiError(httpStatus.UNAUTHORIZED, 'Unauthorized access');
   }
@@ -36,36 +37,32 @@ const depositMoney = async (
   if (payload?.amount < 0) {
     throw new ApiError(httpStatus.NOT_ACCEPTABLE, "Amount can't be Negative");
   }
+  generateTransactionId(GenerateTransactionIDEnum.Deposit);
+  // await prisma.$transaction(async tx => {
+  //   if (decodedUserInfo && decodedUserInfo.userFinancialInfo) {
+  //     await tx.userFinancialInfo.update({
+  //       where: {
+  //         accountNumber: decodedUserInfo.userFinancialInfo?.accountNumber,
+  //       },
+  //       data: {
+  //         accountBalance:
+  //           decodedUserInfo.userFinancialInfo?.accountBalance + payload.amount,
+  //       },
+  //     });
 
-  await prisma.$transaction(async tx => {
-    if (decodedUserInfo && decodedUserInfo.userFinancialInfo) {
-      await tx.userFinancialInfo.update({
-        where: {
-          accountNumber: decodedUserInfo.userFinancialInfo?.accountNumber,
-        },
-        data: {
-          accountBalance:
-            decodedUserInfo.userFinancialInfo?.accountBalance + payload.amount,
-        },
-      });
+  //     const createDeposit = await tx.deposit.create({
+  //       data: payload,
+  //     });
 
-      const createDeposit = await tx.deposit.create({
-        data: {
-          amount: payload.amount,
-          depositSource:payload.depositSource,
-        }
-      })  
-
-      await prisma.transaction.create({
-        data: {
-       
-          userId: decodedUserInfo.id,
-          transactionType: TransactionTypeEnum.Deposit,
-          ...payload,
-        },
-      });
-    }
-  });
+  //     await prisma.transaction.create({
+  //       data: {
+  //         transactionId: createDeposit.transactionId,
+  //         transactionType: TransactionTypeEnum.Deposit,
+  //         ...payload,
+  //       },
+  //     });
+  //   }
+  // });
 };
 
 export const TransactionServices = {

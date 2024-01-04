@@ -23,24 +23,23 @@ enum AccountStatus {
 }
 
 model User {
-  id                 String             @id @default(uuid())
-  firstName          String
-  lastName           String
-  nationalId         String             @unique
-  phoneNumber        String             @unique
-  password           String
-  pin                String
-  role               UserRole
-  lastLogin          DateTime?          @default(now())
-  passwordChangedAt  DateTime?
-  pinChangeAt        DateTime?
-  accountStatus      AccountStatus      @default(active)
-  createdAt          DateTime           @default(now())
-  updatedAt          DateTime           @updatedAt
-  userFinancialInfo  UserFinancialInfo?
-  devices            DeviceInfo[]
-  personalInfo       PersonalInfo?
-  transactionHistory Transaction[]
+  id                String             @id @default(uuid())
+  firstName         String
+  lastName          String
+  nationalId        String             @unique
+  phoneNumber       String             @unique
+  password          String
+  pin               String
+  role              UserRole
+  lastLogin         DateTime?          @default(now())
+  passwordChangedAt DateTime?
+  pinChangeAt       DateTime?
+  accountStatus     AccountStatus      @default(active)
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+  userFinancialInfo UserFinancialInfo?
+  devices           DeviceInfo[]
+  personalInfo      PersonalInfo?
 }
 
 model PersonalInfo {
@@ -62,11 +61,10 @@ model PersonalInfo {
 }
 
 model UserFinancialInfo {
-  id                  String    @id @default(uuid())
-  accountNumber       String    @unique
-  accountBalance      Float     @default(0.0)
-  accountType         String    @default("current")
-  currency            String    @default("BDT")
+  accountNumber       String        @id @unique
+  accountBalance      Float         @default(0.0)
+  accountType         String        @default("current")
+  currency            String        @default("BDT")
   interestRate        Float?
   creditLimit         Float?
   overdraftLimit      Float?
@@ -75,8 +73,12 @@ model UserFinancialInfo {
   creditScore         Int?
   accountOpeningDate  DateTime?
   lastUpdatedDate     DateTime?
-  updatedAt           DateTime  @updatedAt
-  user                User      @relation(fields: [id], references: [id])
+  updatedAt           DateTime      @updatedAt
+  user                User          @relation(fields: [accountNumber], references: [id])
+  Deposit             Deposit[]
+  Withdrawal          Withdrawal[]
+  Transfer            Transfer[]
+  Transaction         Transaction[]
 }
 
 model DeviceInfo {
@@ -97,6 +99,12 @@ model DeviceInfo {
   User            User     @relation(fields: [id], references: [id])
 }
 
+enum TransactionTypeEnum {
+  Deposit
+  Withdrawal
+  Transfer
+}
+
 enum DepositSourceEnum {
   bank_transfer
   credit_card
@@ -109,28 +117,65 @@ enum WithdrawSourceEnum {
   atm
 }
 
-enum TransactionTypeEnum {
-  Deposit
-  Withdrawal
-  Transfer
+enum TransferSourceEnum {
+  Cholti_to_Cholti
+  Cash_by_code
+  BKash
+  Nagad
+  Prepaid_Card
+  Binimoy
+}
+
+model Deposit {
+  transactionId       String            @id @unique
+  amount              Float
+  depositSource       DepositSourceEnum
+  bankName            String?
+  bankAccountNo       String?
+  creditCardName      String?
+  creditCardNumber    String?
+  atmId               String?
+  agentId             String?
+  createdAt           DateTime          @default(now())
+  userFinancialInfo   UserFinancialInfo @relation(fields: [userFinancialInfoId], references: [accountNumber])
+  userFinancialInfoId String
+}
+
+model Withdrawal {
+  transactionId       String             @id @unique
+  amount              Float
+  withdrawSource      WithdrawSourceEnum
+  atmId               String?
+  agentId             String?
+  createdAt           DateTime           @default(now())
+  userFinancialInfo   UserFinancialInfo  @relation(fields: [userFinancialInfoId], references: [accountNumber])
+  userFinancialInfoId String
+}
+
+model Transfer {
+  transactionId       String            @id @unique
+  amount              Float
+  userFinancialInfo   UserFinancialInfo @relation(fields: [userFinancialInfoId], references: [accountNumber])
+  userFinancialInfoId String
+  bankName            String?
+  bankAccountNo       String?
+  receiverName        String?
+  receiverId          String?
+  reference           String?
+  receiverNID         String?
+  cashByCodePIN       String?
+  creditCardName      String?
+  creditCardNumber    String?
+  atmId               String?
+  agentId             String?
+  createdAt           DateTime          @default(now())
 }
 
 model Transaction {
-  id               String              @id @default(uuid())
-  amount           Float
-  transactionId    String
-  transactionType  TransactionTypeEnum
-  dipositSource    DepositSourceEnum?
-  withdrawSource   WithdrawSourceEnum?
-  bankName         String?
-  bankAccountNo    String?
-  creditCardName   String?
-  creditCardNumber String?
-  atmId            String?
-  agentId          String?
-  receiverId       String?
-  reference        String?
-  createdAt        DateTime            @default(now())
-  userId           String
-  user             User                @relation(fields: [userId], references: [id])
+  transactionId       String              @id @unique
+  transactionType     TransactionTypeEnum
+  reference           String?
+  createdAt           DateTime            @default(now())
+  userFinancialInfo   UserFinancialInfo   @relation(fields: [userFinancialInfoId], references: [accountNumber])
+  userFinancialInfoId String
 }

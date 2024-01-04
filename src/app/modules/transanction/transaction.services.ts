@@ -41,7 +41,7 @@ const depositMoney = async (
     if (decodedUserInfo && decodedUserInfo.userFinancialInfo) {
       await tx.userFinancialInfo.update({
         where: {
-          id: decodedUserInfo.userFinancialInfo?.id,
+          accountNumber: decodedUserInfo.userFinancialInfo?.accountNumber,
         },
         data: {
           accountBalance:
@@ -49,11 +49,17 @@ const depositMoney = async (
         },
       });
 
+      const createDeposit = await tx.deposit.create({
+        data: {
+          amount: payload.amount,
+          depositSource:payload.depositSource,
+        }
+      })  
+
       await prisma.transaction.create({
         data: {
-          //@ts-expect-error
+       
           userId: decodedUserInfo.id,
-          //@ts-expect-error
           transactionType: TransactionTypeEnum.Deposit,
           ...payload,
         },

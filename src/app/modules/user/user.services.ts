@@ -16,16 +16,20 @@ const getMyProfile = async (token: string | undefined) => {
     config.jwt.secret as Secret,
   );
 
-  const includeRelations: Record<string, true> = {};
-  includeRelations['devices'] = true;
-  includeRelations['personalInfo'] = true;
-  includeRelations['userFinancialInfo'] = true;
+  // const includeRelations: Record<string, true> = {};
+  // includeRelations['devices'] = true;
+  // includeRelations['personalInfo'] = true;
+  // includeRelations['userFinancialInfo'] = true;
 
   const decodedUserInfo = await prisma.user.findUnique({
     where: {
       id: verifyToken?.userId,
     },
-    include: includeRelations,
+    include: {
+      userFinancialInfo: true,
+      personalInfo: true,
+      deviceInfo: true,
+    },
   });
 
   if (!decodedUserInfo) {
@@ -71,8 +75,6 @@ const updateMyProfile = async (
   const updatedResult = excludeFields(result, keysToExclude);
   return updatedResult;
 };
-
-
 
 export const UserServices = {
   getMyProfile,

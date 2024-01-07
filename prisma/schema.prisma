@@ -41,6 +41,8 @@ model User {
   personalInfo      PersonalInfo?
   userFinancialInfo UserFinancialInfo?
   deviceInfo        DeviceInfo?
+  Loan              Loan[]
+  LoanOfficer       LoanOfficer?
 }
 
 model PersonalInfo {
@@ -49,8 +51,8 @@ model PersonalInfo {
   profilePicture   String?
   gender           String?
   nationality      String?
-  address          String?
-  phoneNumber      String?
+  otherPhoneNumber String?
+  passportId       String?
   email            String?
   fatherName       String?
   motherName       String?
@@ -186,4 +188,34 @@ model Transaction {
   withdrawalId    String?             @unique
   transfer        Transfer?           @relation(fields: [transferId], references: [id])
   transferId      String?             @unique
+}
+
+model Loan {
+  id            String      @id @default(uuid())
+  borrowerId    String
+  amount        Float
+  interestRate  Float
+  termMonths    Int
+  startDate     DateTime
+  status        LoanStatus
+  loanOfficer   LoanOfficer @relation(fields: [loanOfficerId], references: [id])
+  loanOfficerId String
+  borrower      User        @relation(fields: [borrowerId], references: [id])
+}
+
+enum LoanStatus {
+  PENDING
+  APPROVED
+  ACTIVE
+  CLOSED
+}
+
+model LoanOfficer {
+  id          String   @id @default(uuid())
+  employeeId  String   @unique
+  department  String
+  hireDate    DateTime
+  activeLoans Loan[]
+  user        User     @relation(fields: [userId], references: [id])
+  userId      String   @unique
 }

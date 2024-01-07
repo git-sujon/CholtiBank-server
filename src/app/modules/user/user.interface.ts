@@ -6,5 +6,5 @@ export type IUser = {
   phoneNumber: string;
   password: string;
   pin: string;
-
 };
+

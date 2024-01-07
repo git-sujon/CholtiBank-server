@@ -108,20 +108,22 @@ const withdrawMoney = async (
   if (payload?.amount < 0) {
     throw new ApiError(httpStatus.NOT_ACCEPTABLE, "Amount can't be Negative");
   }
-
+  let transactionInfo = null;
   await prisma.$transaction(async tx => {
-    if (
-      decodedUserInfo &&
-      decodedUserInfo.userFinancialInfo &&
-      decodedUserInfo.userFinancialInfo.id
-    ) {
+    if (decodedUserInfo && decodedUserInfo.userFinancialInfo) {
+      const userBalanceAfterTransfer =
+        decodedUserInfo.userFinancialInfo.accountBalance - payload.amount;
+
+      if (userBalanceAfterTransfer < 0) {
+        throw new ApiError(httpStatus.NOT_ACCEPTABLE, 'Insufficient Balance');
+      }
+
       await tx.userFinancialInfo.update({
         where: {
           id: decodedUserInfo.userFinancialInfo?.id,
         },
         data: {
-          accountBalance:
-            decodedUserInfo.userFinancialInfo?.accountBalance - payload.amount,
+          accountBalance: userBalanceAfterTransfer,
         },
       });
 
@@ -134,7 +136,7 @@ const withdrawMoney = async (
         },
       });
 
-      await prisma.transaction.create({
+      transactionInfo = await prisma.transaction.create({
         data: {
           userId: decodedUserInfo.id,
           transactionId: withdraw.transactionId,
@@ -144,6 +146,8 @@ const withdrawMoney = async (
       });
     }
   });
+
+  return transactionInfo;
 };
 
 export const TransactionServices = {

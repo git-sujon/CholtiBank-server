@@ -33,7 +33,21 @@ const getAllUsers = catchAsync(async (req: Request, res: Response) => {
 });
 
 
+const getAllEmployees = catchAsync(async (req: Request, res: Response) => {
+  const authToken = req.headers.authorization;
+  const result = await AdminServices.getAllEmployees(authToken);
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: 'All Users Retried',
+    data: result,
+  });
+});
+
+
 export const AdminController = {
   createEmployees,
-  getAllUsers
+  getAllUsers,
+  getAllEmployees
 };

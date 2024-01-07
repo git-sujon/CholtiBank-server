@@ -11,6 +11,15 @@ route.post(
   AdminController.createEmployees,
 );
 
-route.get('/get-all-users', auth(ENUM_USER_ROLE.USER), AdminController.getAllUsers)
+route.get(
+  '/get-all-users',
+  auth(ENUM_USER_ROLE.ADMIN),
+  AdminController.getAllUsers,
+);
+route.get(
+  '/get-all-employees',
+  auth(ENUM_USER_ROLE.ADMIN),
+  AdminController.getAllEmployees,
+);
 
 export const AdminRoutes = route;

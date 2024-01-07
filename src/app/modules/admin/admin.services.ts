@@ -74,7 +74,29 @@ const getAllUsers = async (token: string | undefined) => {
   return updatedResult;
 };
 
+const getAllEmployees = async (token: string | undefined) => {
+  const verifyDecodedUser = await UserHelpers.verifyDecodedUser(token);
+
+  if (verifyDecodedUser?.role !== UserRole.admin) {
+    throw new Error('You are not authorized to perform this action');
+  }
+
+  const users = await prisma.user.findMany({
+    where: {
+      isEmployee: true,
+      role: {
+        in: [UserRole.loan_officer, UserRole.customer_service_representative],
+      },
+    },
+  });
+  const keysToExclude: (keyof User)[] = ['password', 'pin'];
+  const updatedResult = excludeFields(users, keysToExclude);
+
+  return updatedResult;
+};
+
 export const AdminServices = {
   createEmployees,
   getAllUsers,
+  getAllEmployees,
 };

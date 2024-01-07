@@ -3,7 +3,6 @@ import ApiError from '../../../errors/ApiError';
 import prisma from '../../../shared/prisma';
 import bcrypt from 'bcrypt';
 import config from '../../../config';
-import { checkNationalIdExist, checkPhoneNumberExist } from './auth.utils';
 import { jwtHelpers } from '../../../helpers/jwtHelpers';
 import { IUserLogin } from './auth.interface';
 import { IUser } from '../user/user.interface';
@@ -11,10 +10,28 @@ import { generateAccountNumber } from '../../../helpers/generateAccountNumber';
 import { UserRole } from '@prisma/client';
 
 const userSignUp = async (payload: IUser) => {
-  checkPhoneNumberExist(payload.phoneNumber);
-  checkNationalIdExist(payload.nationalId);
-
   return prisma.$transaction(async tx => {
+    // checkPhoneNumberExist(payload.phoneNumber);
+    // checkNationalIdExist(payload.nationalId);
+
+    const userPhoneAlreadyExist = await prisma.user.findFirst({
+      where: {
+        phoneNumber: payload.phoneNumber,
+      },
+    });
+    if (userPhoneAlreadyExist) {
+      throw new ApiError(httpStatus.NOT_FOUND, 'Phone Number Already Exist');
+    }
+
+    const userNationalIdAlreadyExist = await prisma.user.findFirst({
+      where: {
+        nationalId: payload.nationalId,
+      },
+    });
+    if (userNationalIdAlreadyExist) {
+      throw new ApiError(httpStatus.NOT_FOUND, 'NationalId Already Exist');
+    }
+
     // Hash the password and pin asynchronously
     const hashPassword = await bcrypt.hash(
       payload.password,

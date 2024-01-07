@@ -22,4 +22,13 @@ route.get(
   AdminController.getAllEmployees,
 );
 
+
+route.get(
+  '/get-single-user/:id',
+  auth(ENUM_USER_ROLE.ADMIN),
+  AdminController.getSingleUser,
+);
+
+
+
 export const AdminRoutes = route;

@@ -5,7 +5,6 @@ import httpStatus from 'http-status';
 import sendResponse from '../../../shared/sendResponse';
 import { AdminServices } from './admin.services';
 
-
 const createEmployees = catchAsync(async (req: Request, res: Response) => {
   const authToken = req.headers.authorization;
   const payload = req.body;
@@ -19,7 +18,6 @@ const createEmployees = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
-
 const getAllUsers = catchAsync(async (req: Request, res: Response) => {
   const authToken = req.headers.authorization;
   const result = await AdminServices.getAllUsers(authToken);
@@ -32,7 +30,6 @@ const getAllUsers = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
-
 const getAllEmployees = catchAsync(async (req: Request, res: Response) => {
   const authToken = req.headers.authorization;
   const result = await AdminServices.getAllEmployees(authToken);
@@ -40,14 +37,27 @@ const getAllEmployees = catchAsync(async (req: Request, res: Response) => {
   sendResponse(res, {
     statusCode: httpStatus.OK,
     success: true,
-    message: 'All Users Retried',
+    message: 'All Users data retried',
     data: result,
   });
 });
 
+const getSingleUser = catchAsync(async (req: Request, res: Response) => {
+  const authToken = req.headers.authorization;
+  const { id } = req.params;
+  const result = await AdminServices.getSingleUser(authToken, id);
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: 'User data retried',
+    data: result,
+  });
+});
 
 export const AdminController = {
   createEmployees,
   getAllUsers,
-  getAllEmployees
+  getAllEmployees,
+  getSingleUser,
 };

@@ -11,4 +11,10 @@ route.post(
   TransactionController.depositMoney,
 );
 
+route.post(
+  '/withdraw-money',
+  auth(ENUM_USER_ROLE.USER),
+  TransactionController.withdrawMoney,
+);
+
 export const TransactionRoutes = route;

@@ -5,8 +5,7 @@ import {
 } from '@prisma/client';
 
 // Deposit Type
-export type IDeposit = {
-  transactionId: string;
+export type IAddDeposit = {
   amount: number;
   depositSource: DepositSourceEnum;
   bankName?: string | null;
@@ -15,23 +14,20 @@ export type IDeposit = {
   creditCardNumber?: string | null;
   atmId?: string | null;
   agentId?: string | null;
-  userFinancialInfoId: string;
+  reference?:string
 };
 
 // Withdrawal Type
-export type IWithdrawal = {
-  transactionId: string;
+export type IWithdrawalMoney = {
   amount: number;
   withdrawSource: WithdrawSourceEnum;
   atmId?: string | null;
   agentId?: string | null;
-  userFinancialInfoId: string;
+  reference?:string
 };
 
 // Transaction Type
 export type ITransaction = {
-  transactionId: string;
   transactionType: TransactionTypeEnum;
   reference?: string | null;
-  userFinancialInfoId: string;
 };

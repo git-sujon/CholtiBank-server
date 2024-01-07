@@ -8,6 +8,7 @@ import { jwtHelpers } from '../../../helpers/jwtHelpers';
 import { IUserLogin } from './auth.interface';
 import { IUser } from '../user/user.interface';
 import { generateAccountNumber } from '../../../helpers/generateAccountNumber';
+import { UserRole } from '@prisma/client';
 
 const userSignUp = async (payload: IUser) => {
   checkPhoneNumberExist(payload.phoneNumber);
@@ -27,13 +28,20 @@ const userSignUp = async (payload: IUser) => {
     payload.pin = hashPin;
     const user = await tx.user.create({
       data: {
+        role: UserRole.user,
         ...payload,
-        personalInfo: {
-          create: {},
-        },
-        devices: {
-          create: {},
-        },
+      },
+    });
+
+    await tx.personalInfo.create({
+      data: {
+        userId: user.id,
+      },
+    });
+
+    await tx.deviceInfo.create({
+      data: {
+        userId: user.id,
       },
     });
 

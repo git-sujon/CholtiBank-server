@@ -1,5 +1,3 @@
-import { UserRole } from '@prisma/client';
-
 export type IUser = {
   id: string;
   firstName: string;
@@ -8,5 +6,5 @@ export type IUser = {
   phoneNumber: string;
   password: string;
   pin: string;
-  role: UserRole;
+
 };

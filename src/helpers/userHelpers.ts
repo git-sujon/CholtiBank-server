@@ -8,7 +8,7 @@ import prisma from '../shared/prisma';
 const verifyDecodedUser = async (token: string | undefined) => {
   const verifyToken = jwtHelpers.verifyToken(
     token as string,
-    config.jwt.secret as Secret
+    config.jwt.secret as Secret,
   );
 
   const decodedUserInfo = await prisma.user.findUnique({
@@ -22,10 +22,6 @@ const verifyDecodedUser = async (token: string | undefined) => {
   }
   return decodedUserInfo;
 };
-
-
-
-
 
 export const UserHelpers = {
   verifyDecodedUser,

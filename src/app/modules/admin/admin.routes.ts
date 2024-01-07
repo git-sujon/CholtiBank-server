@@ -6,9 +6,11 @@ import { ENUM_USER_ROLE } from '../../../enums/user';
 const route = express.Router();
 
 route.post(
-  '/create-loan-officer',
+  '/create-employees',
   auth(ENUM_USER_ROLE.USER),
-  AdminController.createLoanOfficer,
+  AdminController.createEmployees,
 );
+
+route.get('/get-all-users', auth(ENUM_USER_ROLE.USER), AdminController.getAllUsers)
 
 export const AdminRoutes = route;

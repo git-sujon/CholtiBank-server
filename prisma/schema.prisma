@@ -31,6 +31,7 @@ model User {
   password          String
   pin               String
   role              UserRole
+  isEmployee        Boolean            @default(false)
   lastLogin         DateTime?          @default(now())
   passwordChangedAt DateTime?
   pinChangeAt       DateTime?

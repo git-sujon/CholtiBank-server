@@ -6,20 +6,34 @@ import sendResponse from '../../../shared/sendResponse';
 import { AdminServices } from './admin.services';
 
 
-const createLoanOfficer = catchAsync(async (req: Request, res: Response) => {
+const createEmployees = catchAsync(async (req: Request, res: Response) => {
   const authToken = req.headers.authorization;
   const payload = req.body;
-  const result = await AdminServices.createLoanOfficer(authToken, payload);
+  const result = await AdminServices.createEmployees(authToken, payload);
 
   sendResponse(res, {
     statusCode: httpStatus.OK,
     success: true,
-    message: 'Loan Officer created successfully',
+    message: 'Employee created successfully',
+    data: result,
+  });
+});
+
+
+const getAllUsers = catchAsync(async (req: Request, res: Response) => {
+  const authToken = req.headers.authorization;
+  const result = await AdminServices.getAllUsers(authToken);
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: 'All Users Retried',
     data: result,
   });
 });
 
 
 export const AdminController = {
-  createLoanOfficer
+  createEmployees,
+  getAllUsers
 };

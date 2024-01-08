@@ -13,7 +13,7 @@ const depositMoney = catchAsync(async (req: Request, res: Response) => {
   sendResponse(res, {
     statusCode: httpStatus.OK,
     success: true,
-    message: 'Money received successfully',
+    message: 'Money received successful',
     data: result,
   });
 });
@@ -26,7 +26,7 @@ const withdrawMoney = catchAsync(async (req: Request, res: Response) => {
   sendResponse(res, {
     statusCode: httpStatus.OK,
     success: true,
-    message: 'Withdraw Money successfully',
+    message: 'Withdraw Money successful',
     data: result,
   });
 });
@@ -39,7 +39,33 @@ const transferMoney = catchAsync(async (req: Request, res: Response) => {
   sendResponse(res, {
     statusCode: httpStatus.OK,
     success: true,
-    message: 'Transfer money successfully',
+    message: 'Transfer money successful',
+    data: result,
+  });
+});
+const mobileRecharge = catchAsync(async (req: Request, res: Response) => {
+  const authToken = req.headers.authorization;
+  const payload = req.body;
+  const result = await TransactionServices.mobileRecharge(authToken, payload);
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: 'Mobile recharge successful',
+    data: result,
+  });
+});
+
+
+
+const getMyStatements = catchAsync(async (req: Request, res: Response) => {
+  const authToken = req.headers.authorization;
+  const result = await TransactionServices.getMyStatements(authToken);
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: 'Statements retrieve',
     data: result,
   });
 });
@@ -47,5 +73,7 @@ const transferMoney = catchAsync(async (req: Request, res: Response) => {
 export const TransactionController = {
   depositMoney,
   withdrawMoney,
-  transferMoney
+  transferMoney,
+  mobileRecharge,
+  getMyStatements
 };

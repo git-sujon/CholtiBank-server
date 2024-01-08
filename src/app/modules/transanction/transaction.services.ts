@@ -9,10 +9,12 @@ import {
 } from '../../../helpers/generateTransactionId';
 import {
   IAddDeposit,
+  IMobileRecharge,
   ITransferMoney,
   IWithdrawalMoney,
 } from './transaction.interface';
 import { transferValidityCheck } from './transaction.utils';
+import { UserHelpers } from '../../../helpers/userHelpers';
 
 const depositMoney = async (
   token: string | undefined,
@@ -171,8 +173,71 @@ const transferMoney = async (
   return transactionInfo;
 };
 
+const mobileRecharge = async (
+  token: string | undefined,
+  payload: IMobileRecharge,
+) => {
+  const decodedUserInfo = await transferValidityCheck(token, payload.amount);
+
+  let transactionInfo = null;
+  await prisma.$transaction(async tx => {
+    if (decodedUserInfo && decodedUserInfo.userFinancialInfo) {
+      const userBalanceAfterTransfer =
+        decodedUserInfo.userFinancialInfo.accountBalance - payload.amount;
+
+      if (userBalanceAfterTransfer < 0) {
+        throw new ApiError(httpStatus.NOT_ACCEPTABLE, 'Insufficient Balance');
+      }
+
+      await tx.userFinancialInfo.update({
+        where: {
+          id: decodedUserInfo.userFinancialInfo?.id,
+        },
+        data: {
+          accountBalance: userBalanceAfterTransfer,
+        },
+      });
+
+      const mobileRecharge = await tx.mobileRecharge.create({
+        data: {
+          transactionId: generateTransactionId(
+            GenerateTransactionIDEnum.Mobile_Recharge,
+          ),
+          ...payload,
+        },
+      });
+
+      transactionInfo = await tx.transaction.create({
+        data: {
+          userId: decodedUserInfo.id,
+          transactionId: mobileRecharge.transactionId,
+          transactionType: TransactionTypeEnum.Mobile_Recharge,
+          reference: 'Mobile Recharge',
+          mobileRechargeId: mobileRecharge.id,
+        },
+      });
+    }
+  });
+
+  return transactionInfo;
+};
+
+const getMyStatements = async (token: string | undefined) => {
+  const verifyDecodedUser = await UserHelpers.verifyDecodedUser(token);
+
+  const result = await prisma.transaction.findMany({
+    where: {
+      userId: verifyDecodedUser?.id,
+    },
+  });
+
+  return result;
+};
+
 export const TransactionServices = {
   depositMoney,
   withdrawMoney,
   transferMoney,
+  mobileRecharge,
+  getMyStatements,
 };

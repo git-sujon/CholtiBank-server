@@ -3,6 +3,7 @@ export enum GenerateTransactionIDEnum {
   Deposit = 'DEP',
   Withdrawal = 'WIT',
   Transfer = 'TRA',
+  Mobile_Recharge='MBR'
 }
 
 export const generateTransactionId = (

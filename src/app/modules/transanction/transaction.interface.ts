@@ -1,5 +1,7 @@
 import {
   DepositSourceEnum,
+  MobileOperatorEnum,
+  SimTypeEnum,
   TransactionTypeEnum,
   TransferSourceEnum,
   WithdrawSourceEnum,
@@ -49,3 +51,11 @@ export type ITransferMoney = {
   atmId?: string;
   agentId?: string;
 };
+
+
+export type IMobileRecharge ={
+  phoneNumber: string;
+  amount: number;
+  mobileOperators: MobileOperatorEnum;
+  simType: SimTypeEnum;
+}

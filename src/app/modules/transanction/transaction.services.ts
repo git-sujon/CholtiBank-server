@@ -1,45 +1,24 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 import httpStatus from 'http-status';
 import ApiError from '../../../errors/ApiError';
-import { jwtHelpers } from '../../../helpers/jwtHelpers';
-import { Secret } from 'jsonwebtoken';
-import config from '../../../config';
 import prisma from '../../../shared/prisma';
 import { TransactionTypeEnum } from '@prisma/client';
 import {
   GenerateTransactionIDEnum,
   generateTransactionId,
 } from '../../../helpers/generateTransactionId';
-import { IAddDeposit, IWithdrawalMoney } from './transaction.interface';
+import {
+  IAddDeposit,
+  ITransferMoney,
+  IWithdrawalMoney,
+} from './transaction.interface';
+import { transferValidityCheck } from './transaction.utils';
 
 const depositMoney = async (
   token: string | undefined,
   payload: IAddDeposit,
 ) => {
-  if (!token) {
-    throw new ApiError(httpStatus.UNAUTHORIZED, 'Unauthorized access');
-  }
-  const verifyToken = jwtHelpers.verifyToken(
-    token as string,
-    config.jwt.secret as Secret,
-  );
-
-  const decodedUserInfo = await prisma.user.findUnique({
-    where: {
-      id: verifyToken?.userId,
-    },
-    include: {
-      userFinancialInfo: true,
-    },
-  });
-
-  if (!decodedUserInfo) {
-    throw new ApiError(httpStatus.NOT_FOUND, 'Unauthorized');
-  }
-
-  if (payload?.amount < 0) {
-    throw new ApiError(httpStatus.NOT_ACCEPTABLE, "Amount can't be Negative");
-  }
+  const decodedUserInfo = await transferValidityCheck(token, payload.amount);
 
   let transactionInfo = null;
 
@@ -64,12 +43,13 @@ const depositMoney = async (
         },
       });
 
-      transactionInfo = await prisma.transaction.create({
+      transactionInfo = await tx.transaction.create({
         data: {
           userId: decodedUserInfo.id,
           transactionId: deposit.transactionId,
           transactionType: TransactionTypeEnum.Deposit,
           reference: payload?.reference,
+          depositId: deposit.id,
         },
         include: {
           deposit: true,
@@ -84,30 +64,8 @@ const withdrawMoney = async (
   token: string | undefined,
   payload: IWithdrawalMoney,
 ) => {
-  if (!token) {
-    throw new ApiError(httpStatus.UNAUTHORIZED, 'Unauthorized access');
-  }
-  const verifyToken = jwtHelpers.verifyToken(
-    token as string,
-    config.jwt.secret as Secret,
-  );
+  const decodedUserInfo = await transferValidityCheck(token, payload.amount);
 
-  const decodedUserInfo = await prisma.user.findUnique({
-    where: {
-      id: verifyToken?.userId,
-    },
-    include: {
-      userFinancialInfo: true,
-    },
-  });
-
-  if (!decodedUserInfo) {
-    throw new ApiError(httpStatus.NOT_FOUND, 'Unauthorized');
-  }
-
-  if (payload?.amount < 0) {
-    throw new ApiError(httpStatus.NOT_ACCEPTABLE, "Amount can't be Negative");
-  }
   let transactionInfo = null;
   await prisma.$transaction(async tx => {
     if (decodedUserInfo && decodedUserInfo.userFinancialInfo) {
@@ -136,12 +94,75 @@ const withdrawMoney = async (
         },
       });
 
-      transactionInfo = await prisma.transaction.create({
+      transactionInfo = await tx.transaction.create({
         data: {
           userId: decodedUserInfo.id,
           transactionId: withdraw.transactionId,
           transactionType: TransactionTypeEnum.Withdrawal,
           reference: payload.reference,
+          withdrawalId: withdraw.id,
+        },
+      });
+    }
+  });
+
+  return transactionInfo;
+};
+
+const transferMoney = async (
+  token: string | undefined,
+  payload: ITransferMoney,
+) => {
+  const decodedUserInfo = await transferValidityCheck(token, payload.amount);
+
+  let transactionInfo = null;
+  await prisma.$transaction(async tx => {
+    if (decodedUserInfo && decodedUserInfo.userFinancialInfo) {
+      const userBalanceAfterTransfer =
+        decodedUserInfo.userFinancialInfo.accountBalance - payload.amount;
+
+      if (userBalanceAfterTransfer < 0) {
+        throw new ApiError(httpStatus.NOT_ACCEPTABLE, 'Insufficient Balance');
+      }
+
+      if (payload.transferSource === 'Cholti_to_Cholti') {
+        const receiver = await tx.userFinancialInfo.update({
+          where: {
+            accountNumber: payload.bankAccountNo,
+          },
+          data: {
+            accountBalance: { increment: payload.amount },
+          },
+        });
+
+        payload.receiverId = receiver.userId;
+      }
+
+      await tx.userFinancialInfo.update({
+        where: {
+          id: decodedUserInfo.userFinancialInfo?.id,
+        },
+        data: {
+          accountBalance: userBalanceAfterTransfer,
+        },
+      });
+
+      const transfer = await tx.transfer.create({
+        data: {
+          transactionId: generateTransactionId(
+            GenerateTransactionIDEnum.Transfer,
+          ),
+          ...payload,
+        },
+      });
+
+      transactionInfo = await tx.transaction.create({
+        data: {
+          userId: decodedUserInfo.id,
+          transactionId: transfer.transactionId,
+          transactionType: TransactionTypeEnum.Transfer,
+          reference: payload.reference,
+          transferId: transfer.id,
         },
       });
     }
@@ -153,4 +174,5 @@ const withdrawMoney = async (
 export const TransactionServices = {
   depositMoney,
   withdrawMoney,
+  transferMoney,
 };

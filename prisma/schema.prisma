@@ -121,15 +121,6 @@ enum WithdrawSourceEnum {
   atm
 }
 
-enum TransferSourceEnum {
-  Cholti_to_Cholti
-  Cash_by_code
-  BKash
-  Nagad
-  Prepaid_Card
-  Binimoy
-}
-
 model Deposit {
   id               String            @id @default(uuid())
   transactionId    String            @unique
@@ -156,22 +147,36 @@ model Withdrawal {
   Transaction    Transaction?
 }
 
+enum TransferSourceEnum {
+  Cholti_to_Cholti
+  NPSB
+  EFT
+  RTGS
+  Cash_by_code
+  BKash
+  Nagad
+  Prepaid_Card
+  Binimoy
+}
+
 model Transfer {
-  id               String       @id @default(uuid())
-  transactionId    String       @unique
+  id               String             @id @default(uuid())
+  transactionId    String             @unique
   amount           Float
+  transferSource   TransferSourceEnum
   bankName         String?
   bankAccountNo    String?
   receiverName     String?
   receiverId       String?
-  reference        String?
   receiverNID      String?
+  bankBranch       String?
+  reference        String?
   cashByCodePIN    String?
   creditCardName   String?
   creditCardNumber String?
   atmId            String?
   agentId          String?
-  createdAt        DateTime     @default(now())
+  createdAt        DateTime           @default(now())
   Transaction      Transaction?
 }
 

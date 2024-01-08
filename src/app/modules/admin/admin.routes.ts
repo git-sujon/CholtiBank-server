@@ -7,7 +7,7 @@ const route = express.Router();
 
 route.post(
   '/create-employees',
-  auth(ENUM_USER_ROLE.USER),
+  auth(ENUM_USER_ROLE.ADMIN),
   AdminController.createEmployees,
 );
 

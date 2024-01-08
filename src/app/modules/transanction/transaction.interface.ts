@@ -1,6 +1,7 @@
 import {
   DepositSourceEnum,
   TransactionTypeEnum,
+  TransferSourceEnum,
   WithdrawSourceEnum,
 } from '@prisma/client';
 
@@ -14,7 +15,7 @@ export type IAddDeposit = {
   creditCardNumber?: string | null;
   atmId?: string | null;
   agentId?: string | null;
-  reference?:string
+  reference?: string;
 };
 
 // Withdrawal Type
@@ -23,11 +24,28 @@ export type IWithdrawalMoney = {
   withdrawSource: WithdrawSourceEnum;
   atmId?: string | null;
   agentId?: string | null;
-  reference?:string
+  reference?: string;
 };
 
 // Transaction Type
 export type ITransaction = {
   transactionType: TransactionTypeEnum;
   reference?: string | null;
+};
+
+export type ITransferMoney = {
+  amount: number;
+  transferSource: TransferSourceEnum;
+  bankName?: string;
+  bankAccountNo?: string;
+  receiverName?: string;
+  receiverId?: string;
+  reference?: string;
+  receiverNID?: string;
+  bankBranch?: string;
+  cashByCodePIN?: string;
+  creditCardName?: string;
+  creditCardNumber?: string;
+  atmId?: string;
+  agentId?: string;
 };

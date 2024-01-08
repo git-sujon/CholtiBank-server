@@ -5,6 +5,8 @@ import { ICreateLoanOfficer } from './admin.interface';
 import { UserHelpers } from '../../../helpers/userHelpers';
 import { User, UserRole } from '@prisma/client';
 import excludeFields from '../../../helpers/excludingfields';
+import ApiError from '../../../errors/ApiError';
+import httpStatus from 'http-status';
 
 const createEmployees = async (
   token: string | undefined,
@@ -13,7 +15,10 @@ const createEmployees = async (
   const verifyDecodedUser = await UserHelpers.verifyDecodedUser(token);
 
   if (verifyDecodedUser?.role !== UserRole.admin) {
-    throw new Error('You are not authorized to perform this action');
+    throw new ApiError(
+      httpStatus.FORBIDDEN,
+      'You are not authorized to perform this action',
+    );
   }
 
   const employeeId = generateEmployeeId('EMP_LO');
@@ -59,7 +64,10 @@ const getAllUsers = async (token: string | undefined) => {
   const verifyDecodedUser = await UserHelpers.verifyDecodedUser(token);
 
   if (verifyDecodedUser?.role !== UserRole.admin) {
-    throw new Error('You are not authorized to perform this action');
+    throw new ApiError(
+      httpStatus.FORBIDDEN,
+      'You are not authorized to perform this action',
+    );
   }
 
   const users = await prisma.user.findMany({
@@ -78,7 +86,10 @@ const getAllEmployees = async (token: string | undefined) => {
   const verifyDecodedUser = await UserHelpers.verifyDecodedUser(token);
 
   if (verifyDecodedUser?.role !== UserRole.admin) {
-    throw new Error('You are not authorized to perform this action');
+    throw new ApiError(
+      httpStatus.FORBIDDEN,
+      'You are not authorized to perform this action',
+    );
   }
 
   const users = await prisma.user.findMany({
@@ -95,25 +106,25 @@ const getAllEmployees = async (token: string | undefined) => {
   return updatedResult;
 };
 
-
-
-const getSingleUser = async (token: string | undefined, id:string) => {
+const getSingleUser = async (token: string | undefined, id: string) => {
   const verifyDecodedUser = await UserHelpers.verifyDecodedUser(token);
 
   if (verifyDecodedUser?.role !== UserRole.admin) {
-    throw new Error('You are not authorized to perform this action');
+    throw new ApiError(
+      httpStatus.FORBIDDEN,
+      'You are not authorized to perform this action',
+    );
   }
 
   const user = await prisma.user.findUnique({
     where: {
-      id
+      id,
     },
   });
 
-  if(!user){
-    throw new Error('User not found');
+  if (!user) {
+    throw new ApiError(httpStatus.NOT_FOUND, 'User not found');
   }
-
 
   const keysToExclude: (keyof User)[] = ['password', 'pin'];
   const updatedResult = excludeFields(user, keysToExclude);
@@ -121,13 +132,9 @@ const getSingleUser = async (token: string | undefined, id:string) => {
   return updatedResult;
 };
 
-
-
-
-
 export const AdminServices = {
   createEmployees,
   getAllUsers,
   getAllEmployees,
-  getSingleUser
+  getSingleUser,
 };

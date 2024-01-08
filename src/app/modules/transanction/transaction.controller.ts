@@ -26,7 +26,20 @@ const withdrawMoney = catchAsync(async (req: Request, res: Response) => {
   sendResponse(res, {
     statusCode: httpStatus.OK,
     success: true,
-    message: 'Money received successfully',
+    message: 'Withdraw Money successfully',
+    data: result,
+  });
+});
+
+const transferMoney = catchAsync(async (req: Request, res: Response) => {
+  const authToken = req.headers.authorization;
+  const payload = req.body;
+  const result = await TransactionServices.transferMoney(authToken, payload);
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: 'Transfer money successfully',
     data: result,
   });
 });
@@ -34,4 +47,5 @@ const withdrawMoney = catchAsync(async (req: Request, res: Response) => {
 export const TransactionController = {
   depositMoney,
   withdrawMoney,
+  transferMoney
 };

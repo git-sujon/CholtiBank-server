@@ -55,9 +55,23 @@ const getSingleUser = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+
+const getAllTransactions = catchAsync(async (req: Request, res: Response) => {
+  const authToken = req.headers.authorization;
+  const result = await AdminServices.getAllTransactions(authToken);
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: 'All transactions retrieve',
+    data: result,
+  });
+});
+
 export const AdminController = {
   createEmployees,
   getAllUsers,
   getAllEmployees,
   getSingleUser,
+  getAllTransactions
 };

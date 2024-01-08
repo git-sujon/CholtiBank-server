@@ -29,6 +29,12 @@ route.get(
   AdminController.getSingleUser,
 );
 
+route.get(
+  '/all-transactions',
+  auth(ENUM_USER_ROLE.ADMIN),
+  AdminController.getAllTransactions,
+);
+
 
 
 export const AdminRoutes = route;

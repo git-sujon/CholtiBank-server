@@ -132,9 +132,23 @@ const getSingleUser = async (token: string | undefined, id: string) => {
   return updatedResult;
 };
 
+const getAllTransactions = async (token: string | undefined) => {
+  const verifyDecodedUser = await UserHelpers.verifyDecodedUser(token);
+  if (verifyDecodedUser?.role !== UserRole.admin) {
+    throw new ApiError(
+      httpStatus.FORBIDDEN,
+      'You are not authorized to perform this action',
+    );
+  }
+  const result = await prisma.transaction.findMany({});
+
+  return result;
+};
+
 export const AdminServices = {
   createEmployees,
   getAllUsers,
   getAllEmployees,
   getSingleUser,
+  getAllTransactions
 };

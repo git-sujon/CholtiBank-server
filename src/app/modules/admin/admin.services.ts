@@ -140,7 +140,13 @@ const getAllTransactions = async (token: string | undefined) => {
       'You are not authorized to perform this action',
     );
   }
-  const result = await prisma.transaction.findMany({});
+  const result = await prisma.transaction.findMany({
+    include: {
+      deposit: true,
+      withdrawal: true,
+      transfer: true,
+    },
+  });
 
   return result;
 };
@@ -150,5 +156,5 @@ export const AdminServices = {
   getAllUsers,
   getAllEmployees,
   getSingleUser,
-  getAllTransactions
+  getAllTransactions,
 };

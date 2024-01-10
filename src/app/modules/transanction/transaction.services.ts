@@ -33,6 +33,7 @@ const depositMoney = async (
         data: {
           accountBalance:
             decodedUserInfo.userFinancialInfo?.accountBalance + payload.amount,
+          totalDeposit: { increment: payload.amount },
         },
       });
 
@@ -57,6 +58,18 @@ const depositMoney = async (
           deposit: true,
         },
       });
+
+      // const isPinMatch = await bcrypt.compare(
+      //   payload.pin,
+      //   decodedUserInfo.pin,
+      // );
+
+      // if (!isPinMatch) {
+      //   throw new ApiError(
+      //     httpStatus.UNAUTHORIZED,
+      //     'User or Password Not Matching',
+      //   );
+      // }
     }
   });
   return transactionInfo;
@@ -84,6 +97,7 @@ const withdrawMoney = async (
         },
         data: {
           accountBalance: userBalanceAfterTransfer,
+          totalWithdraw: { increment: payload.amount },
         },
       });
 
@@ -146,6 +160,7 @@ const transferMoney = async (
         },
         data: {
           accountBalance: userBalanceAfterTransfer,
+          totalTransfer: { increment: payload.amount },
         },
       });
 
@@ -195,6 +210,7 @@ const mobileRecharge = async (
         },
         data: {
           accountBalance: userBalanceAfterTransfer,
+          totalRecharge: { increment: payload.amount },
         },
       });
 
@@ -228,6 +244,11 @@ const getMyStatements = async (token: string | undefined) => {
   const result = await prisma.transaction.findMany({
     where: {
       userId: verifyDecodedUser?.id,
+    },
+    include: {
+      deposit: true,
+      withdrawal: true,
+      transfer: true,
     },
   });
 

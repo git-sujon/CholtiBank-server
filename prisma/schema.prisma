@@ -69,6 +69,10 @@ model UserFinancialInfo {
   id                  String    @id @default(uuid())
   accountNumber       String    @unique
   accountBalance      Float     @default(0.0)
+  totalDeposit        Float?    @default(0.0)
+  totalWithdraw       Float?    @default(0.0)
+  totalTransfer       Float?    @default(0.0)
+  totalRecharge       Float?    @default(0.0)
   accountType         String    @default("current")
   currency            String    @default("BDT")
   interestRate        Float?
@@ -170,6 +174,7 @@ model Transfer {
   receiverName     String?
   receiverId       String?
   receiverNID      String?
+  phoneNumber      String?
   bankBranch       String?
   reference        String?
   cashByCodePIN    String?
@@ -202,7 +207,7 @@ model MobileRecharge {
   mobileOperators MobileOperatorEnum
   simType         SimTypeEnum
   createdAt       DateTime           @default(now())
-  Transaction Transaction?
+  Transaction     Transaction?
 }
 
 model Transaction {

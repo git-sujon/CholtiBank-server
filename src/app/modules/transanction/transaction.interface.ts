@@ -52,10 +52,9 @@ export type ITransferMoney = {
   agentId?: string;
 };
 
-
-export type IMobileRecharge ={
+export type IMobileRecharge = {
   phoneNumber: string;
   amount: number;
   mobileOperators: MobileOperatorEnum;
   simType: SimTypeEnum;
-}
+};
